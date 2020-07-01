@@ -1,5 +1,6 @@
 import halide as hl
 import math
+from pprint import pprint
 
 def focus_stack_pipeline():
     outputs = []
@@ -172,11 +173,11 @@ def focus_stack_pipeline():
 
     outputs = new_outputs
 
-    print("OUTPUTS!!:", outputs)
+    print("OUTPUT LAYERS: ")
+    pprint(outputs)
 
     output_funcs = [output for _, output in outputs]
-    print("OUTPUT LAYERS: ", outputs)
-
+    
     pipeline = hl.Pipeline(output_funcs)
 
     return {
@@ -379,12 +380,8 @@ def autoschedule(pipeline, autoscheduler_name, target, machine):
 
 
 if __name__ == "__main__":
-    fs1 = focus_stack_pipeline()
-    print("Autoscheduling with: Mullapudi2016")
-    autoschedule(fs1['pipeline'], "Mullapudi2016", hl.get_target_from_environment(), hl.MachineParams(4, 256*1024, 50))
-    print()
-    fs2 = focus_stack_pipeline()
+    fs = focus_stack_pipeline()
     print("Autoscheduling with: Adams2019")
-    autoschedule(fs2['pipeline'], "Adams2019", hl.get_target_from_environment(), hl.MachineParams(4, 256*1024, 50))
+    autoschedule(fs['pipeline'], "Adams2019", hl.get_target_from_environment(), hl.MachineParams(4, 256*1024, 50))
     
     
