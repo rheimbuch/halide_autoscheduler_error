@@ -217,9 +217,9 @@ def region_energy(x, y, c, img):
     _gray = gray(x, y, c, img)
 
     # use gaussian blur on squarred laplacian
-    gray_squarred = mkfunc('gray_sqrd', img)
-    gray_squarred[x,y] = (_gray[x,y] * _gray[x,y])
-    return gaussian_1d(x, y, c, gray_squarred)
+    gray_squared = mkfunc('gray_sqrd', img)
+    gray_squared[x,y] = (_gray[x,y] * _gray[x,y])
+    return gaussian_1d(x, y, c, gray_squared)
 
 
 def gray(x, y, c, img):
@@ -297,12 +297,6 @@ def energy_maxes(x, y, c, start_energy, next_energy):
     return combined
 
 
-def autoschedule(pipeline, autoscheduler_name, target, machine):
-    hl.load_plugin('auto_schedule')
-    pipeline.set_default_autoscheduler_name(autoscheduler_name)
-    return pipeline.auto_schedule(target, machine)
-
-
 def merge_laplacian(x, y, c, merged_energy, next_energy, prev_lap, next_lap):
     merged_lap = mkfunc('merged_lap', merged_energy, next_energy, next_lap, prev_lap)
     merged_lap[x,y,c] = hl.select(merged_energy[x,y] == next_energy[x,y],
@@ -327,6 +321,7 @@ def entropy(x, y, c, img, w, h, hist_index):
     levels[x,y] = levels[x,y] * -1.0
 
     return levels
+
 
 def deviation(x, y, c, img):
     _gray = gray(x, y, c, img)
@@ -377,9 +372,19 @@ def histogram(x, y, c, img, w, h, hist_index):
     return histogram
 
 
+def autoschedule(pipeline, autoscheduler_name, target, machine):
+    hl.load_plugin('auto_schedule')
+    pipeline.set_default_autoscheduler_name(autoscheduler_name)
+    return pipeline.auto_schedule(target, machine)
+
+
 if __name__ == "__main__":
-    m = focus_stack_pipeline()
-    pipeline = m['pipeline']
-    sched_str = autoschedule(pipeline, "Adams2019", hl.get_target_from_environment(), hl.MachineParams(2, 256*1024, 50))
-    print(sched_str)
+    fs1 = focus_stack_pipeline()
+    print("Autoscheduling with: Mullapudi2016")
+    autoschedule(fs1['pipeline'], "Mullapudi2016", hl.get_target_from_environment(), hl.MachineParams(4, 256*1024, 50))
+    print()
+    fs2 = focus_stack_pipeline()
+    print("Autoscheduling with: Adams2019")
+    autoschedule(fs2['pipeline'], "Adams2019", hl.get_target_from_environment(), hl.MachineParams(4, 256*1024, 50))
+    
     
